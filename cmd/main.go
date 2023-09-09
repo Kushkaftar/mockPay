@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"log"
 	"mockPay/internal/pkg/app"
 	"mockPay/pkg/config"
 )
@@ -12,15 +11,10 @@ const pathToConfig = "./configs"
 func main() {
 	var fileName string
 
-	flag.StringVar(&fileName, "env", "", "desc")
+	flag.StringVar(&fileName, "env", "", "use flag \"-env\" for config file name")
 	flag.Parse()
 
-	c, err := config.NewConfig(fileName, pathToConfig)
-	if err != nil {
-		log.Fatalf("failed to load config, err - %s", err)
-	}
+	c := config.MustConfig(fileName, pathToConfig)
 
-	if err := app.Start(c); err != nil {
-		log.Fatalf("app not start, error - %s", err)
-	}
+	app.MustStart(c)
 }

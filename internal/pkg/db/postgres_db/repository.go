@@ -25,10 +25,6 @@ type Merchant interface {
 	CreateMerchantBalance(merchantBalance *models.MerchantBalance) error
 }
 
-type Card interface {
-	CraeteCard(card *models.Card) error
-}
-
 type Transaction interface {
 	AddTransaction(card *models.Card, transactoin *models.Transaction) error
 	Status(transactoin *models.Transaction) error
@@ -42,7 +38,7 @@ type Balance interface {
 	GetCardBalance(cardBalance *models.CardBalance) error
 	GetMerchantBalance(merchantBalance *models.MerchantBalance) error
 	UpdateTransactionStatus(transactoin *models.Transaction, status int) error
-	PurchaseBalanceEvent(
+	BalanceEvent(
 		merchantBalance *models.MerchantBalance,
 		merchantBalanceEvent *models.BalanceEvent,
 		cardBalance *models.CardBalance,
@@ -52,7 +48,6 @@ type Balance interface {
 
 type PostgresDB struct {
 	Merchant
-	Card
 	Transaction
 	Balance
 }
@@ -60,7 +55,6 @@ type PostgresDB struct {
 func NewPostgresDB(db *sqlx.DB) *PostgresDB {
 	return &PostgresDB{
 		Merchant:    newMerchantDB(db),
-		Card:        newCardDB(db),
 		Transaction: newTransactionDB(db),
 		Balance:     NewBalanceDB(db),
 	}

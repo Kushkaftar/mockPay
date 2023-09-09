@@ -30,8 +30,8 @@ func (s *PurchaseService) NewPurchase(purchase models.PurchaseRequest, merchantI
 	// transaction model
 	transaction := models.Transaction{
 		MerchantID:        merchantID,
-		TransactionType:   purchaseType,
-		TransactionStatus: newStatus,
+		TransactionType:   models.PurchaseType,
+		TransactionStatus: models.NewStatus,
 		UUID:              uuid.New().String(),
 		Amount:            purchase.Amount,
 	}
@@ -54,7 +54,7 @@ func (s *PurchaseService) NewPurchase(purchase models.PurchaseRequest, merchantI
 	// TODO del
 	bl := balance_event.NewBalanceEventService(s.allMethods)
 
-	go bl.BalanceEvent(&transaction)
+	go bl.PurchaseBalanceEvent(&transaction)
 
 	// TODO refactor
 	purchaseResponse := models.PrchaseResponse{

@@ -1,7 +1,7 @@
 package app
 
 import (
-	"fmt"
+	"log"
 	"mockPay/internal/pkg/db/postgres_db"
 	"mockPay/internal/pkg/handlers"
 	"mockPay/internal/pkg/models"
@@ -9,13 +9,11 @@ import (
 	"mockPay/internal/services/transaction_service"
 )
 
-func Start(c *models.Config) error {
-
-	fmt.Printf("config - %+v", c)
+func MustStart(c *models.Config) {
 
 	connect, err := postgres_db.NewPostgresConnect(c.DB)
 	if err != nil {
-		return err
+		log.Fatalf("failed to connect to database, error - %s", err)
 	}
 
 	repositiry := postgres_db.NewPostgresDB(connect)
@@ -27,8 +25,6 @@ func Start(c *models.Config) error {
 
 	server := new(server)
 	if err := server.serverRun(c.Server.Port, handler.InitRoutes()); err != nil {
-		return err
+		log.Fatalf("failed to raise the server, error - %s", err)
 	}
-
-	return nil
 }

@@ -1,12 +1,11 @@
 package balance_event
 
 import (
-	"errors"
 	"log"
 	"mockPay/internal/pkg/models"
 )
 
-func (s *BalanceEventService) purchaseBalanceEvent(transaction *models.Transaction) error {
+func (s *BalanceEventService) PurchaseBalanceEvent(transaction *models.Transaction) {
 
 	// 1 - проставляем транзакции статус processing
 	// 2 - получаем баланс карты
@@ -16,9 +15,9 @@ func (s *BalanceEventService) purchaseBalanceEvent(transaction *models.Transacti
 	// 5 - устанавливаем статус complite
 
 	// 1
-	if err := s.repository.UpdateTransactionStatus(transaction, processingStatus); err != nil {
+	if err := s.repository.UpdateTransactionStatus(transaction, models.ProcessingStatus); err != nil {
 		log.Printf("!!! ALARM !!! purchaseBalanceEvent, UpdateTransactionStatus err - %s", err)
-		return err
+		return
 	}
 
 	// 2
@@ -28,7 +27,7 @@ func (s *BalanceEventService) purchaseBalanceEvent(transaction *models.Transacti
 	log.Printf("!!!!! purchaseBalanceEvent, cardBalance - %+v", cardBalance)
 	if err := s.repository.GetCardBalance(&cardBalance); err != nil {
 		log.Printf("purchaseBalanceEvent, GetCardBalance err - %s", err)
-		return err
+		return
 	}
 
 	// 3
@@ -37,13 +36,12 @@ func (s *BalanceEventService) purchaseBalanceEvent(transaction *models.Transacti
 		// 3.1
 		log.Println("there are not enough funds on the card")
 
-		if err := s.repository.UpdateTransactionStatus(transaction, rejectedStatus); err != nil {
+		if err := s.repository.UpdateTransactionStatus(transaction, models.RejectedStatus); err != nil {
 			log.Printf("!!! ALARM !!! purchaseBalanceEvent, UpdateTransactionStatus err - %s", err)
-			return err
+			return
 		}
 
-		// TODO обренуть ошибку в кастом
-		return errors.New("there are not enough funds on the card")
+		return
 	}
 
 	// 4
@@ -55,7 +53,7 @@ func (s *BalanceEventService) purchaseBalanceEvent(transaction *models.Transacti
 
 	if err := s.repository.GetMerchantBalance(&merchantBalance); err != nil {
 		log.Printf("purchaseBalanceEvent, GetMerchantBalance, err - %s", err)
-		return err
+		return
 	}
 
 	newMerchantBalance := merchantBalance.MerchantBalance + transaction.Amount
@@ -76,19 +74,19 @@ func (s *BalanceEventService) purchaseBalanceEvent(transaction *models.Transacti
 		NewBalance:    newCardBalance,
 	}
 
-	if err := s.repository.PurchaseBalanceEvent(&merchantBalance,
+	if err := s.repository.BalanceEvent(&merchantBalance,
 		&merchantBalanceEvent,
 		&cardBalance,
 		&cardBalanceEvent); err != nil {
-		log.Printf("purchaseBalanceEvent, PurchaseBalanceEvent, err - %s", err)
-		return err
+		log.Printf("purchaseBalanceEvent, BalanceEvent, err - %s", err)
+		return
 	}
 
 	// 5
-	if err := s.repository.UpdateTransactionStatus(transaction, complitedStatus); err != nil {
+	if err := s.repository.UpdateTransactionStatus(transaction, models.ComplitedStatus); err != nil {
 		log.Printf("!!! ALARM !!! purchaseBalanceEvent, UpdateTransactionStatus err - %s", err)
-		return err
+		return
 	}
 
-	return nil
+	return
 }

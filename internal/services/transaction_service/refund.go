@@ -31,17 +31,17 @@ func (s *PurchaseService) Refund(refund *models.RefundRquest) (*models.Recurrent
 		return nil, errors.New("refund not possible")
 	}
 
-	if transactionToRefund.TransactionStatus == newStatus ||
-		transactionToRefund.TransactionStatus == processingStatus {
+	if transactionToRefund.TransactionStatus == models.NewStatus ||
+		transactionToRefund.TransactionStatus == models.ProcessingStatus {
 		return nil, errors.New("target transaction not completed")
 	}
 
-	if transactionToRefund.TransactionStatus == rejectedStatus {
+	if transactionToRefund.TransactionStatus == models.RejectedStatus {
 		return nil, errors.New("target transaction rejected")
 	}
 
-	if transactionToRefund.TransactionType != purchaseType &&
-		transactionToRefund.TransactionType != reccurentType {
+	if transactionToRefund.TransactionType != models.PurchaseType &&
+		transactionToRefund.TransactionType != models.ReccurentType {
 		log.Printf("target transaction status - %d", transactionToRefund.TransactionType)
 		return nil, errors.New("target transaction type does not support refund")
 	}
@@ -50,8 +50,8 @@ func (s *PurchaseService) Refund(refund *models.RefundRquest) (*models.Recurrent
 	transaction := models.Transaction{
 		MerchantID:        refund.MerchantID,
 		CardID:            cardID,
-		TransactionType:   refundType,
-		TransactionStatus: newStatus,
+		TransactionType:   models.RefundType,
+		TransactionStatus: models.NewStatus,
 		UUID:              uuid.New().String(),
 		Amount:            refund.Amount,
 	}
@@ -67,9 +67,9 @@ func (s *PurchaseService) Refund(refund *models.RefundRquest) (*models.Recurrent
 	}
 
 	// TODO del
-	bl := balance_event.NewBalanceEventService(s.allMethods)
+	be := balance_event.NewBalanceEventService(s.allMethods)
 
-	go bl.RefundBalanceEvent(&transaction, &transactionToRefund)
+	go be.RefundBalanceEvent(&transaction, &transactionToRefund)
 
 	response := models.RecurrentResponse{
 		Success:           true,

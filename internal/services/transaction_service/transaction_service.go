@@ -5,34 +5,17 @@ import (
 	"mockPay/internal/pkg/models"
 )
 
-// transaction type
-const (
-	_ = iota
-	purchaseType
-	reccurentType
-	refundType
-)
-
 var transactionType = map[int]string{
-	purchaseType:  "purchase",
-	reccurentType: "recurrent",
-	refundType:    "refund",
+	models.PurchaseType:  "purchase",
+	models.ReccurentType: "recurrent",
+	models.RefundType:    "refund",
 }
 
-// transaction stutus
-const (
-	_ = iota
-	newStatus
-	processingStatus
-	complitedStatus
-	rejectedStatus
-)
-
 var transactionStatus = map[int]string{
-	newStatus:        "new",
-	processingStatus: "processing",
-	complitedStatus:  "complite",
-	rejectedStatus:   "rejected",
+	models.NewStatus:        "new",
+	models.ProcessingStatus: "processing",
+	models.ComplitedStatus:  "complite",
+	models.RejectedStatus:   "rejected",
 }
 
 type Purchase interface {

@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewConfig(fileName, directory string) (*models.Config, error) {
+func MustConfig(fileName, directory string) *models.Config {
 	var config models.Config
 
 	if err := initConfig(fileName, directory); err != nil {
@@ -17,10 +17,9 @@ func NewConfig(fileName, directory string) (*models.Config, error) {
 	err := viper.Unmarshal(&config)
 	if err != nil {
 		log.Fatalf("unable to decode into struct, %v", err)
-		return nil, err
 	}
 
-	return &config, nil
+	return &config
 }
 
 func initConfig(fileName, directory string) error {

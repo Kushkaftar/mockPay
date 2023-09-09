@@ -19,8 +19,8 @@ func (s *PurchaseService) Recurrent(recurrent *models.Recurrent) (*models.Recurr
 	transaction := models.Transaction{
 		MerchantID:        recurrent.MerchantID,
 		CardID:            cardID,
-		TransactionType:   reccurentType,
-		TransactionStatus: newStatus,
+		TransactionType:   models.ReccurentType,
+		TransactionStatus: models.NewStatus,
 		UUID:              uuid.New().String(),
 		Amount:            recurrent.Amount,
 	}
@@ -33,7 +33,7 @@ func (s *PurchaseService) Recurrent(recurrent *models.Recurrent) (*models.Recurr
 	// TODO del
 	bl := balance_event.NewBalanceEventService(s.allMethods)
 
-	go bl.BalanceEvent(&transaction)
+	go bl.PurchaseBalanceEvent(&transaction)
 
 	recurrentResponse := models.RecurrentResponse{
 		Success:           true,

@@ -57,7 +57,7 @@ func (r *BalanceDB) UpdateTransactionStatus(transactoin *models.Transaction, sta
 	return nil
 }
 
-func (r *BalanceDB) PurchaseBalanceEvent(
+func (r *BalanceDB) BalanceEvent(
 	merchantBalance *models.MerchantBalance,
 	merchantBalanceEvent *models.BalanceEvent,
 	cardBalance *models.CardBalance,
