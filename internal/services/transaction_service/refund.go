@@ -24,6 +24,7 @@ func (s *PurchaseService) Refund(refund *models.RefundRquest) (*models.Recurrent
 	}
 
 	if err := s.repository.Status(&transactionToRefund); err != nil {
+		// TODO Refactor
 		return nil, err
 	}
 

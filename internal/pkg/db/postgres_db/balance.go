@@ -2,6 +2,7 @@ package postgres_db
 
 import (
 	"fmt"
+	e "mockPay/internal/pkg/errorWrap"
 	"mockPay/internal/pkg/models"
 
 	"github.com/jmoiron/sqlx"
@@ -24,7 +25,7 @@ func (r *BalanceDB) GetCardBalance(cardBalance *models.CardBalance) error {
 
 	err := r.db.QueryRowx(query, cardBalance.CardID).StructScan(&cb)
 	if err != nil {
-		return err
+		return e.Wrap("balanceDB, GetCardBalance", err)
 	}
 
 	cardBalance.CardBalance = cb.CardBalance
@@ -38,7 +39,7 @@ func (r *BalanceDB) GetMerchantBalance(merchantBalance *models.MerchantBalance) 
 
 	err := r.db.QueryRowx(query, merchantBalance.MerchantID).StructScan(merchantBalance)
 	if err != nil {
-		return err
+		return e.Wrap("balanceDB, GetMerchantBalance", err)
 	}
 
 	return nil
@@ -49,7 +50,7 @@ func (r *BalanceDB) UpdateTransactionStatus(transactoin *models.Transaction, sta
 	_, err := r.db.Exec(query, status, transactoin.ID)
 
 	if err != nil {
-		return err
+		return e.Wrap("balanceDB, UpdateTransactionStatus", err)
 	}
 
 	transactoin.TransactionStatus = status
@@ -71,7 +72,7 @@ func (r *BalanceDB) BalanceEvent(
 	// transactoin BD start
 	tx, err := r.db.Begin()
 	if err != nil {
-		return err
+		return e.Wrap("balanceDB, BalanceEvent, bd transactoin begin", err)
 	}
 
 	// 1
@@ -79,7 +80,7 @@ func (r *BalanceDB) BalanceEvent(
 	_, err = tx.Exec(cardBalanceQuery, cardBalanceEvent.NewBalance, cardBalance.CardID)
 	if err != nil {
 		tx.Rollback()
-		return err
+		return e.Wrap("balanceDB, BalanceEvent, update card balance", err)
 	}
 
 	// 2
@@ -94,7 +95,7 @@ func (r *BalanceDB) BalanceEvent(
 	err = rowCardEvent.Scan(&cardBalanceEvent.ID)
 	if err != nil {
 		tx.Rollback()
-		return err
+		return e.Wrap("balanceDB, create card balance event", err)
 	}
 
 	// 3
@@ -102,7 +103,7 @@ func (r *BalanceDB) BalanceEvent(
 	_, err = tx.Exec(merchantBalanceQuery, merchantBalanceEvent.NewBalance, merchantBalance.MerchantID)
 	if err != nil {
 		tx.Rollback()
-		return err
+		return e.Wrap("balanceDB, BalanceEvent, update merchant balance", err)
 	}
 
 	//4
@@ -115,11 +116,11 @@ func (r *BalanceDB) BalanceEvent(
 	err = rowMerchantEvent.Scan(&merchantBalanceEvent.ID)
 	if err != nil {
 		tx.Rollback()
-		return err
+		return e.Wrap("balanceDB, BalanceEvent, create merchant balance event", err)
 	}
 
 	if err := tx.Commit(); err != nil {
-		return err
+		return e.Wrap("balanceDB, BalanceEvent, bd transactoin commit", err)
 	}
 
 	// end transactoin BD
@@ -135,7 +136,7 @@ func (r *BalanceDB) GetSumAllRefands(targerTransactionID int) (*float32, error) 
 
 	row := r.db.QueryRow(query, targerTransactionID)
 	if err := row.Scan(&sum); err != nil {
-		return nil, err
+		return nil, e.Wrap("balanceDB, GetSumAllRefands", err)
 	}
 	return &sum, nil
 }
