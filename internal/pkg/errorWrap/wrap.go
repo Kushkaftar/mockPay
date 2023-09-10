@@ -6,6 +6,7 @@ import (
 )
 
 type QueryError struct {
+	Package    string
 	ResponeErr string
 	err        error
 	WrapError  error

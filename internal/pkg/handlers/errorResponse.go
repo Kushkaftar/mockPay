@@ -4,7 +4,7 @@ import "github.com/gin-gonic/gin"
 
 type errorResponse struct {
 	Success bool
-	Errors  []errorResp `json:"errors"`
+	Errors  errorResp `json:"errors"`
 }
 
 type errorResp struct {
@@ -14,7 +14,5 @@ type errorResp struct {
 func newErrorResponse(c *gin.Context, statusCode int, message string) {
 
 	c.AbortWithStatusJSON(statusCode,
-		errorResponse{Success: false, Errors: []errorResp{
-			{Text: message},
-		}})
+		errorResponse{Success: false, Errors: errorResp{Text: message}})
 }
