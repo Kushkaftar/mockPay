@@ -30,17 +30,21 @@ func (s *PurchaseService) Recurrent(recurrent *models.Recurrent) (*models.Recurr
 		return nil, err
 	}
 
-	// TODO del
-	bl := balance_event.NewBalanceEventService(s.allMethods)
-
-	go bl.PurchaseBalanceEvent(&transaction)
-
 	recurrentResponse := models.RecurrentResponse{
 		Success:           true,
 		TransactionType:   transactionType[transaction.TransactionType],
 		TransactionStatus: transactionStatus[transaction.TransactionStatus],
 		UUID:              transaction.UUID,
 	}
+
+	// TODO refactor
+	// send postback
+	go s.postback.SendPostback(transaction)
+
+	// TODO del
+	bl := balance_event.NewBalanceEventService(s.allMethods, s.postback)
+
+	go bl.PurchaseBalanceEvent(&transaction)
 
 	return &recurrentResponse, nil
 }

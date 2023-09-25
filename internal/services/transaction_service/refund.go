@@ -66,17 +66,21 @@ func (s *PurchaseService) Refund(refund *models.RefundRquest) (*models.Recurrent
 		return nil, err
 	}
 
-	// TODO del
-	be := balance_event.NewBalanceEventService(s.allMethods)
-
-	go be.RefundBalanceEvent(&transaction, &transactionToRefund)
-
 	response := models.RecurrentResponse{
 		Success:           true,
 		TransactionType:   transactionType[transaction.TransactionType],
 		TransactionStatus: transactionStatus[transaction.TransactionStatus],
 		UUID:              transaction.UUID,
 	}
+
+	// TODO refactor
+	// send postback
+	go s.postback.SendPostback(transaction)
+
+	// TODO del
+	be := balance_event.NewBalanceEventService(s.allMethods, s.postback)
+
+	go be.RefundBalanceEvent(&transaction, &transactionToRefund)
 
 	return &response, nil
 }

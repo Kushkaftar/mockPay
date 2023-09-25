@@ -8,17 +8,23 @@ import (
 func (s *BalanceEventService) RefundBalanceEvent(transaction *models.Transaction,
 	targetTransaction *models.Transaction) {
 	// 1 - проставляем транзакции статус processing
+	// 1.1 - send postback
 	// 2 - считаем все рефанды и если их сумма превышает сумму списания возвращаем ошибку
 	// 3 - получаем баланс мерчанта, проверяем что на балансе достаточно средств
 	// 3.1 - если средств не достаточно мнеяем статус на rejected, завершаем выполнение
+	// 3.2 - send postback
 	// 4 - если средств достаточно делаем запись в БД
 	// 5 - устанавливаем статус complite
+	// 5.1 - send postback
 
 	// 1
 	if err := s.repository.UpdateTransactionStatus(transaction, models.ProcessingStatus); err != nil {
 		log.Printf("!!! ALARM !!! refundBalanceEvent, UpdateTransactionStatus err - %s", err)
 		return
 	}
+
+	// 1.1
+	go s.postback.SendPostback(*transaction)
 
 	// 2
 	// get all refand summ
@@ -46,6 +52,10 @@ func (s *BalanceEventService) RefundBalanceEvent(transaction *models.Transaction
 			log.Printf("!!! ALARM !!! purchaseBalanceEvent, UpdateTransactionStatus err - %s", err)
 			return
 		}
+
+		// 3.2
+		go s.postback.SendPostback(*transaction)
+
 		return
 	}
 
@@ -89,6 +99,9 @@ func (s *BalanceEventService) RefundBalanceEvent(transaction *models.Transaction
 		log.Printf("!!! ALARM !!! purchaseBalanceEvent, UpdateTransactionStatus err - %s", err)
 		return
 	}
+
+	// 5.1
+	go s.postback.SendPostback(*transaction)
 
 	return
 }

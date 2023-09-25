@@ -2,6 +2,7 @@ package balance_event
 
 import (
 	"mockPay/internal/pkg/db/postgres_db"
+	"mockPay/internal/services/postback"
 )
 
 const (
@@ -12,10 +13,12 @@ const (
 
 type BalanceEventService struct {
 	repository postgres_db.Balance
+	postback   *postback.Postback
 }
 
-func NewBalanceEventService(repository postgres_db.Balance) *BalanceEventService {
+func NewBalanceEventService(repository postgres_db.Balance, postback *postback.Postback) *BalanceEventService {
 	return &BalanceEventService{
 		repository: repository,
+		postback:   postback,
 	}
 }

@@ -4,19 +4,22 @@ import (
 	"mockPay/internal/pkg/db/postgres_db"
 	"mockPay/internal/pkg/models"
 	"mockPay/internal/services/balance_event"
+	"mockPay/internal/services/postback"
 
 	"github.com/google/uuid"
 )
 
 type PurchaseService struct {
 	repository postgres_db.Transaction
+	postback   *postback.Postback
 	// TODO del allMethods
 	allMethods *postgres_db.PostgresDB
 }
 
-func newPurchaseService(repository postgres_db.Transaction, allMethods *postgres_db.PostgresDB) *PurchaseService {
+func newPurchaseService(repository postgres_db.Transaction, allMethods *postgres_db.PostgresDB, postback *postback.Postback) *PurchaseService {
 	return &PurchaseService{
 		repository: repository,
+		postback:   postback,
 		allMethods: allMethods,
 	}
 }
@@ -51,11 +54,6 @@ func (s *PurchaseService) NewPurchase(purchase models.PurchaseRequest, merchantI
 		return nil, err
 	}
 
-	// TODO del
-	bl := balance_event.NewBalanceEventService(s.allMethods)
-
-	go bl.PurchaseBalanceEvent(&transaction)
-
 	// TODO refactor
 	purchaseResponse := models.PrchaseResponse{
 		Success:           true,
@@ -64,5 +62,15 @@ func (s *PurchaseService) NewPurchase(purchase models.PurchaseRequest, merchantI
 		UUID:              transaction.UUID,
 		HashCard:          card.HashCard,
 	}
+
+	// TODO refactor
+	// send postback
+	go s.postback.SendPostback(transaction)
+
+	// TODO del
+	bl := balance_event.NewBalanceEventService(s.allMethods, s.postback)
+
+	go bl.PurchaseBalanceEvent(&transaction)
+
 	return &purchaseResponse, nil
 }

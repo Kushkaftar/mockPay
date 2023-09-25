@@ -16,8 +16,13 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		{
 			merchant.GET("/all", h.allMerchant)
 			merchant.POST("/create", h.craeteMerchant)
+
+			postback := merchant.Group("postback", h.authMerchant)
+			postback.POST("/set", h.setPostback)
+
+			//merchant.POST("/set-postback", h.authMerchant, h.postbackMerchant)
 		}
-		payments := api.Group("payments", h.authApiMerchant)
+		payments := api.Group("payments", h.authMerchant)
 		{
 			transaction := payments.Group("/transaction")
 			{

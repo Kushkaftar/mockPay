@@ -1,22 +1,19 @@
 package client
 
 import (
-	"log"
 	"net/http"
 )
 
-func (c *Client) Get(url string) {
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+func (c *Client) Send(method string, url string, body []uint8) (*ClientResponse, error) {
+	req, err := http.NewRequest(method, url, nil)
 	if err != nil {
-		log.Printf("fail in send postback, error - %s", err)
-		return
+		return nil, err
 	}
 
 	resp, err := c.HttpClient.Do(req)
 	if err != nil {
-		log.Printf("fail in send postback, error - %s", err)
-		return
+		return nil, err
 	}
 
-	log.Printf("response status code - %d", resp.StatusCode)
+	return &ClientResponse{ResponseCode: resp.StatusCode}, nil
 }

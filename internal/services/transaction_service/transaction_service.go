@@ -3,6 +3,7 @@ package transaction_service
 import (
 	"mockPay/internal/pkg/db/postgres_db"
 	"mockPay/internal/pkg/models"
+	"mockPay/internal/services/postback"
 )
 
 var transactionType = map[int]string{
@@ -29,8 +30,8 @@ type TransactionService struct {
 	Purchase
 }
 
-func NewTransactionService(repository *postgres_db.PostgresDB) *TransactionService {
+func NewTransactionService(repository *postgres_db.PostgresDB, postback *postback.Postback) *TransactionService {
 	return &TransactionService{
-		Purchase: newPurchaseService(repository.Transaction, repository),
+		Purchase: newPurchaseService(repository.Transaction, repository, postback),
 	}
 }

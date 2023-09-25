@@ -10,4 +10,6 @@ DROP TABLE transaction;
 
 DROP TABLE card;
 
+DROP TABLE postback;
+
 DROP TABLE merchant;

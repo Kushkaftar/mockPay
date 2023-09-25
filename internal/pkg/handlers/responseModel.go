@@ -11,3 +11,7 @@ type SuccessMerchants struct {
 	Success   bool              `json:"success"`
 	Merchants []models.Merchant `json:"merchants,omitempty"`
 }
+
+type SuccesPostback struct {
+	Success bool `json:"success"`
+}

@@ -2,7 +2,6 @@ package postgres_db
 
 import (
 	"fmt"
-	"log"
 	"mockPay/internal/pkg/models"
 
 	"github.com/jmoiron/sqlx"
@@ -19,7 +18,6 @@ func newMerchantDB(db *sqlx.DB) *MerchantDB {
 }
 
 func (r *MerchantDB) CraeteMerchant(merchant *models.Merchant) error {
-	log.Printf("db CraeteMerchant, merchant - %+v", merchant)
 	query := fmt.Sprintf("INSERT INTO %s (title, api_key) values ($1, $2) RETURNING id", merchantTable)
 
 	row := r.db.QueryRow(query, merchant.Title, merchant.ApiKey)
@@ -55,6 +53,7 @@ func (r *MerchantDB) GetAllMerchant() (*[]models.Merchant, error) {
 	return &merchants, nil
 }
 
+// TODO refactor
 func (r *MerchantDB) MerchantTitle(title string) error {
 	merchant := models.Merchant{}
 

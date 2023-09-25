@@ -6,6 +6,7 @@ import (
 	"mockPay/internal/pkg/handlers"
 	"mockPay/internal/pkg/models"
 	"mockPay/internal/services/merchant_service"
+	"mockPay/internal/services/postback"
 	"mockPay/internal/services/transaction_service"
 )
 
@@ -18,8 +19,10 @@ func MustStart(c *models.Config) {
 
 	repositiry := postgres_db.NewPostgresDB(connect)
 
+	postbackService := postback.NewPostback(repositiry.Postback)
+
 	merchantService := merchant_service.NewMerchantService(repositiry)
-	transactionService := transaction_service.NewTransactionService(repositiry)
+	transactionService := transaction_service.NewTransactionService(repositiry, postbackService)
 
 	handler := handlers.NewHandler(merchantService, transactionService)
 
