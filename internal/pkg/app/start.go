@@ -17,12 +17,12 @@ func MustStart(c *models.Config) {
 		log.Fatalf("failed to connect to database, error - %s", err)
 	}
 
-	repositiry := postgres_db.NewPostgresDB(connect)
+	repository := postgres_db.NewPostgresDB(connect)
 
-	postbackService := postback.NewPostback(repositiry.Postback)
+	postbackService := postback.NewPostback(repository.Postback)
 
-	merchantService := merchant_service.NewMerchantService(repositiry)
-	transactionService := transaction_service.NewTransactionService(repositiry, postbackService)
+	merchantService := merchant_service.NewMerchantService(repository)
+	transactionService := transaction_service.NewTransactionService(repository, postbackService)
 
 	handler := handlers.NewHandler(merchantService, transactionService)
 

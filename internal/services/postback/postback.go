@@ -30,18 +30,18 @@ func (p *Postback) SendPostback(transactoin models.Transaction) {
 		return
 	}
 
+	// postback enabled
+	if !postbackData.IsEnabled {
+		log.Println("postback disabled")
+		return
+	}
+
 	// get url
 	url, err := queryReplase(transactoin, postbackData.PostbackUrl)
 	if err != nil {
 		log.Printf("error parse url, error - %s", err)
 	}
 	log.Printf("url - %s", *url)
-
-	// postback enabled
-	if !postbackData.IsEnabled {
-		log.Println("postback disabled")
-		return
-	}
 
 	// send postback
 	resp, err := p.client.Send(postbackData.PostbackMethod, postbackData.PostbackUrl, nil)
