@@ -17,8 +17,6 @@ func (h *Handler) craeteMerchant(c *gin.Context) {
 		return
 	}
 
-	log.Printf("handler craeteMerchant, merchant - %+v", merchant)
-
 	if err := h.merchantService.CraeteMerchant(&merchant); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
@@ -32,6 +30,8 @@ func (h *Handler) allMerchant(c *gin.Context) {
 	merchants, err := h.merchantService.GetAllMerchant()
 	if err != nil {
 		log.Printf("handler allMerchant, err - %s", err)
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
 	}
 	log.Printf("handler allMerchant. merchants - %+v", merchants)
 	c.JSON(http.StatusOK, SuccessMerchants{Success: true, Merchants: *merchants})

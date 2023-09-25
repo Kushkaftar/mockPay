@@ -10,6 +10,7 @@ type Merchant interface {
 	GetMerchant(merchant *models.Merchant) error
 	GetHashMerchant(merchant *models.Merchant) error
 	GetAllMerchant() (*[]models.Merchant, error)
+	SetPostback(postback *models.Postback) error
 }
 
 type MerchantService struct {

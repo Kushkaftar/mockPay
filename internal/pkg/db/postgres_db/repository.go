@@ -14,6 +14,7 @@ const (
 	cardBalanceTable     = "card_balance"
 	merchantBalanceTable = "merchant_balance"
 	balanceEventTable    = "balance_event"
+	postbackTable        = "postback"
 )
 
 type Merchant interface {
@@ -46,10 +47,17 @@ type Balance interface {
 	GetSumAllRefands(targerTransactionID int) (*float32, error)
 }
 
+type Postback interface {
+	CreatePostback(postback *models.Postback) error
+	GetPostback(postback *models.Postback) error
+	UpdatePostback(postback *models.Postback) error
+}
+
 type PostgresDB struct {
 	Merchant
 	Transaction
 	Balance
+	Postback
 }
 
 func NewPostgresDB(db *sqlx.DB) *PostgresDB {
@@ -57,5 +65,6 @@ func NewPostgresDB(db *sqlx.DB) *PostgresDB {
 		Merchant:    newMerchantDB(db),
 		Transaction: newTransactionDB(db),
 		Balance:     NewBalanceDB(db),
+		Postback:    newPostbackDB(db),
 	}
 }

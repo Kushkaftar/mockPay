@@ -8,11 +8,14 @@ import (
 func (s *BalanceEventService) PurchaseBalanceEvent(transaction *models.Transaction) {
 
 	// 1 - проставляем транзакции статус processing
+	// 1.1 send postback
 	// 2 - получаем баланс карты
 	// 3 - проверяем что на балансе достаточно средст для списания
 	// 3.1 - если средств не достаточно мнеяем статус на rejected, завершаем выполнение
+	// 3.2 send postback
 	// 4 - если средств достаточно делаем запись в БД
 	// 5 - устанавливаем статус complite
+	// 5.1 send postback
 
 	// 1
 	if err := s.repository.UpdateTransactionStatus(transaction, models.ProcessingStatus); err != nil {
@@ -20,11 +23,16 @@ func (s *BalanceEventService) PurchaseBalanceEvent(transaction *models.Transacti
 		return
 	}
 
+	// 1.1
+	go s.postback.SendPostback(*transaction)
+
 	// 2
 	cardBalance := models.CardBalance{
 		CardID: transaction.CardID,
 	}
-	log.Printf("!!!!! purchaseBalanceEvent, cardBalance - %+v", cardBalance)
+
+	// log.Printf("!!!!! purchaseBalanceEvent, cardBalance - %+v", cardBalance)
+
 	if err := s.repository.GetCardBalance(&cardBalance); err != nil {
 		log.Printf("purchaseBalanceEvent, GetCardBalance err - %s", err)
 		return
@@ -40,6 +48,9 @@ func (s *BalanceEventService) PurchaseBalanceEvent(transaction *models.Transacti
 			log.Printf("!!! ALARM !!! purchaseBalanceEvent, UpdateTransactionStatus err - %s", err)
 			return
 		}
+
+		// 3.2
+		go s.postback.SendPostback(*transaction)
 
 		return
 	}
@@ -87,6 +98,9 @@ func (s *BalanceEventService) PurchaseBalanceEvent(transaction *models.Transacti
 		log.Printf("!!! ALARM !!! purchaseBalanceEvent, UpdateTransactionStatus err - %s", err)
 		return
 	}
+
+	// 5.2
+	go s.postback.SendPostback(*transaction)
 
 	return
 }

@@ -5,6 +5,17 @@ CREATE TABLE merchant
     api_key varchar(64) not null unique
 );
 
+CREATE TABLE postback 
+(
+    id serial not null unique,
+    merchant_id int REFERENCES merchant ( id ) ON DELETE CASCADE not null unique,
+    postback_url varchar(1024) not null,
+    postback_method varchar(4) not null,
+    is_enabled boolean not null,
+    check ( postback_method in ('GET', 'POST'))
+
+);
+
 CREATE TABLE card (
     id serial primary key unique not null,
     pan bigint not null,

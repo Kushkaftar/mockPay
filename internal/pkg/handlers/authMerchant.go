@@ -13,7 +13,7 @@ const (
 	merchantCtx  = "merchantId"
 )
 
-func (h *Handler) authApiMerchant(c *gin.Context) {
+func (h *Handler) authMerchant(c *gin.Context) {
 	header := c.GetHeader(apiKeyHeader)
 
 	if header == "" {
