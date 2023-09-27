@@ -69,11 +69,15 @@ func (r *TransactionDB) AddTransaction(card *models.Card, transactoin *models.Tr
 }
 
 func (r *TransactionDB) Status(transactoin *models.Transaction) error {
-	query := fmt.Sprintf("SELECT transaction_type, transaction_status, uuid FROM %s WHERE uuid=$1 AND merchant_id=$2;", transactionTable)
+	var cardID sql.NullInt64
+
+	query := fmt.Sprintf("SELECT id, transaction_type, transaction_status, card_id, amount FROM %s WHERE uuid=$1 AND merchant_id=$2;", transactionTable)
 	row := r.db.QueryRow(query, transactoin.UUID, transactoin.MerchantID)
-	if err := row.Scan(&transactoin.TransactionType, &transactoin.TransactionStatus, &transactoin.UUID); err != nil {
+	if err := row.Scan(&transactoin.ID, &transactoin.TransactionType, &transactoin.TransactionStatus, &cardID, &transactoin.Amount); err != nil {
 		return err
 	}
+
+	transactoin.CardID = int(cardID.Int64)
 
 	return nil
 }

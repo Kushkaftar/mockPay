@@ -17,6 +17,8 @@ func (s *PurchaseService) Refund(refund *models.RefundRquest) (*models.Recurrent
 		return nil, err
 	}
 
+	log.Printf("cardID - %d", cardID)
+
 	// get transaction
 	transactionToRefund := models.Transaction{
 		MerchantID: refund.MerchantID,
@@ -26,6 +28,8 @@ func (s *PurchaseService) Refund(refund *models.RefundRquest) (*models.Recurrent
 	if err := s.repository.Status(&transactionToRefund); err != nil {
 		return nil, err
 	}
+
+	log.Printf("transactionToRefund - %+v", transactionToRefund)
 
 	if transactionToRefund.CardID != cardID {
 		return nil, errors.New("refund not possible")
