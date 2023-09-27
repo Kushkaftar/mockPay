@@ -10,6 +10,7 @@ var transactionType = map[int]string{
 	models.PurchaseType:  "purchase",
 	models.ReccurentType: "recurrent",
 	models.RefundType:    "refund",
+	models.FormType:      "form",
 }
 
 var transactionStatus = map[int]string{
@@ -20,10 +21,13 @@ var transactionStatus = map[int]string{
 }
 
 type Purchase interface {
-	NewPurchase(purchase models.PurchaseRequest, merchantID int) (*models.PrchaseResponse, error)
+	NewPurchase(purchase models.PurchaseRequest, merchantID int) (*models.PurchaseResponse, error)
 	Recurrent(recurrent *models.Recurrent) (*models.RecurrentResponse, error)
 	Refund(refund *models.RefundRquest) (*models.RecurrentResponse, error)
-	Status(transaction *models.Transaction) (*models.PrchaseResponse, error)
+	Status(transaction *models.Transaction) (*models.PurchaseResponse, error)
+	NewFormPurchase(purchase models.PurchaseFormRequest, merchantID int) (*models.PurchaseFormResponse, error)
+	GetTransaction(transaction *models.Transaction) error
+	FormPurchase(card models.Card, transactoinUUID string) error
 }
 
 type TransactionService struct {

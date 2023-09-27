@@ -33,6 +33,9 @@ type Transaction interface {
 	GetCard(cardHash string, merchantID *int) (int, error)
 	AddNewRecurrent(transactoin *models.Transaction) error
 	AddNewRefund(transactoin *models.Transaction, refund *models.Refund) error
+	FormTransaction(transactoin *models.Transaction) error
+	GetAmountTransaction(transactoin *models.Transaction) error
+	UpdateFormTransaction(card *models.Card, transactoin *models.Transaction) error
 }
 
 type Balance interface {

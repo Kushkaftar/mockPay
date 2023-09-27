@@ -6,6 +6,7 @@ const (
 	PurchaseType
 	ReccurentType
 	RefundType
+	FormType
 )
 
 // transaction status

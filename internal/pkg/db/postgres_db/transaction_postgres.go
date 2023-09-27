@@ -1,6 +1,7 @@
 package postgres_db
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"mockPay/internal/pkg/models"
@@ -68,10 +69,12 @@ func (r *TransactionDB) AddTransaction(card *models.Card, transactoin *models.Tr
 }
 
 func (r *TransactionDB) Status(transactoin *models.Transaction) error {
-	query := fmt.Sprintf("SELECT * FROM %s WHERE uuid=$1 AND merchant_id=$2;", transactionTable)
-	if err := r.db.QueryRowx(query, transactoin.UUID, transactoin.MerchantID).StructScan(transactoin); err != nil {
+	query := fmt.Sprintf("SELECT transaction_type, transaction_status, uuid FROM %s WHERE uuid=$1 AND merchant_id=$2;", transactionTable)
+	row := r.db.QueryRow(query, transactoin.UUID, transactoin.MerchantID)
+	if err := row.Scan(&transactoin.TransactionType, &transactoin.TransactionStatus, &transactoin.UUID); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -167,6 +170,85 @@ func (r *TransactionDB) AddNewRefund(transactoin *models.Transaction, refund *mo
 		tx.Rollback()
 		return err
 	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *TransactionDB) FormTransaction(transactoin *models.Transaction) error {
+	query := fmt.Sprintf("INSERT INTO %s (merchant_id, card_id, transaction_type, transaction_status, uuid, amount) "+
+		"VALUES ($1, $2, $3, $4, $5, $6) RETURNING id", transactionTable)
+
+	row := r.db.QueryRow(query,
+		transactoin.MerchantID,
+		nil,
+		transactoin.TransactionType,
+		transactoin.TransactionStatus,
+		transactoin.UUID,
+		transactoin.Amount)
+
+	if err := row.Scan(&transactoin.ID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// TODO refactor rename
+func (r *TransactionDB) GetAmountTransaction(transactoin *models.Transaction) error {
+	var amount sql.NullFloat64
+
+	query := fmt.Sprintf("SELECT t.amount, t.transaction_status, t.transaction_type FROM %s t WHERE uuid=$1 and t.transaction_type = %d;", transactionTable, models.FormType)
+	row := r.db.QueryRow(query, transactoin.UUID)
+	if err := row.Scan(&amount, &transactoin.TransactionStatus, &transactoin.TransactionType); err != nil {
+		return err
+	}
+	transactoin.Amount = float32(amount.Float64)
+	return nil
+}
+
+func (r *TransactionDB) UpdateFormTransaction(card *models.Card, transactoin *models.Transaction) error {
+	//begin transaction
+	tx, err := r.db.Begin()
+	if err != nil {
+		return err
+	}
+
+	// add card to db
+	createCardQuery := fmt.Sprintf("INSERT INTO %s (pan, card_holder, exp_month, exp_year, cvc, hash_card) "+
+		"VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;", cardTable)
+
+	rowCard := tx.QueryRow(createCardQuery,
+		card.PAN,
+		card.CardHolder,
+		card.ExpMonth,
+		card.ExpYear,
+		card.CVC,
+		card.HashCard)
+	err = rowCard.Scan(&card.ID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// add transaction to db
+	transactoin.CardID = card.ID
+
+	updateTransactionQuery := fmt.Sprintf("UPDATE %s SET card_id=$1 WHERE uuid=$2 RETURNING id, amount, merchant_id;", transactionTable)
+
+	rowTransaction := tx.QueryRow(updateTransactionQuery, transactoin.CardID, transactoin.UUID)
+	if err := rowTransaction.Scan(&transactoin.ID, &transactoin.Amount, &transactoin.MerchantID); err != nil {
+		tx.Rollback()
+		return err
+	}
+	// _, err = tx.Exec(createTransactionQuery, transactoin.CardID, transactoin.ID)
+	// if err != nil {
+	// 	tx.Rollback()
+	// 	return err
+	// }
 
 	if err := tx.Commit(); err != nil {
 		return err

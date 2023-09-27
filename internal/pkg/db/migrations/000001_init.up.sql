@@ -30,7 +30,7 @@ CREATE TABLE card (
 CREATE TABLE transaction (
     id serial primary key unique not null,
     merchant_id int REFERENCES merchant ( id ) ON DELETE CASCADE not null,
-    card_id int REFERENCES card ( id ) ON DELETE CASCADE not null,
+    card_id int REFERENCES card ( id ) ON DELETE CASCADE,
     transaction_type smallint not null,
     transaction_status smallint not null,
     uuid varchar (40) unique not null,
