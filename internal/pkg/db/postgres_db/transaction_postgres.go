@@ -62,6 +62,7 @@ func (r *TransactionDB) AddTransaction(card *models.Card, transactoin *models.Tr
 	}
 
 	if err := tx.Commit(); err != nil {
+		tx.Rollback()
 		return err
 	}
 
@@ -176,6 +177,7 @@ func (r *TransactionDB) AddNewRefund(transactoin *models.Transaction, refund *mo
 	}
 
 	if err := tx.Commit(); err != nil {
+		tx.Rollback()
 		return err
 	}
 
@@ -248,13 +250,9 @@ func (r *TransactionDB) UpdateFormTransaction(card *models.Card, transactoin *mo
 		tx.Rollback()
 		return err
 	}
-	// _, err = tx.Exec(createTransactionQuery, transactoin.CardID, transactoin.ID)
-	// if err != nil {
-	// 	tx.Rollback()
-	// 	return err
-	// }
 
 	if err := tx.Commit(); err != nil {
+		tx.Rollback()
 		return err
 	}
 
