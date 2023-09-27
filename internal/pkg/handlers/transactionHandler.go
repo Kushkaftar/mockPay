@@ -113,3 +113,28 @@ func (h *Handler) status(c *gin.Context) {
 
 	c.JSON(http.StatusOK, response)
 }
+
+func (h *Handler) form(c *gin.Context) {
+	merchantID, err := getMerchantId(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	purchase := models.PurchaseFormRequest{}
+
+	// TODO refactor
+	if err := c.BindJSON(&purchase); err != nil {
+		str := "json is not valid"
+		newErrorResponse(c, http.StatusBadRequest, str)
+		return
+	}
+
+	resp, err := h.transactionService.NewFormPurchase(purchase, merchantID)
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, resp)
+}

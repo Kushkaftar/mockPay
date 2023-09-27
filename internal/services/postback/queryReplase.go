@@ -15,6 +15,7 @@ var transactionTypeMap = map[int]string{
 	models.PurchaseType:  "purchase",
 	models.ReccurentType: "recurrent",
 	models.RefundType:    "refund",
+	models.FormType:      "form",
 }
 
 var transactionStatusMap = map[int]string{

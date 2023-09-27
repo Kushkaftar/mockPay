@@ -10,8 +10,13 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	router.Use(cors.Default())
 
+	router.LoadHTMLGlob("htmlTemplate/**/*")
+
 	api := router.Group("/api")
 	{
+		api.POST("/form/:uuid", h.formPay)
+		api.GET("/form/:uuid", h.formPayment)
+
 		merchant := api.Group("merchant")
 		{
 			merchant.GET("/all", h.allMerchant)
@@ -19,9 +24,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 			postback := merchant.Group("postback", h.authMerchant)
 			postback.POST("/set", h.setPostback)
-
-			//merchant.POST("/set-postback", h.authMerchant, h.postbackMerchant)
 		}
+
 		payments := api.Group("payments", h.authMerchant)
 		{
 			transaction := payments.Group("/transaction")
@@ -30,8 +34,10 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				transaction.POST("/recurrent", h.recurrent)
 				transaction.POST("/refund", h.refund)
 				transaction.POST("/status", h.status)
+				transaction.POST("/form", h.form)
 			}
 		}
+
 	}
 
 	return router
