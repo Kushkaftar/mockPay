@@ -15,7 +15,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	api := router.Group("/api")
 	{
 		api.POST("/form/:uuid", h.formPay)
-		api.GET("/form/:uuid", h.formPayment)
+		api.GET("/form/:uuid", h.formPagePayment)
 
 		merchant := api.Group("merchant")
 		{

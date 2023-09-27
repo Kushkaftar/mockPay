@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (h *Handler) formPayment(c *gin.Context) {
+func (h *Handler) formPagePayment(c *gin.Context) {
 	parseUUID := c.Param("uuid")
 
 	isUUID, err := uuid.Parse(parseUUID)
@@ -70,7 +70,7 @@ func (h *Handler) formPay(c *gin.Context) {
 
 	if err := h.transactionService.FormPurchase(card, isUUID.String()); err != nil {
 		log.Printf("error - %s", err)
-		c.HTML(http.StatusBadRequest, "404/index.tmpl", nil)
+		c.HTML(http.StatusBadRequest, "fail/index.html", nil)
 		return
 	}
 

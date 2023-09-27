@@ -136,8 +136,6 @@ func (s *PurchaseService) FormPurchase(card models.Card, transactoinUUID string)
 		return err
 	}
 
-	log.Printf("card - %+v", card)
-	log.Printf("tr - %+v", tr)
 	// create card balance
 	cardBalance := models.CardBalance{
 		CardID:      card.ID,
@@ -155,7 +153,20 @@ func (s *PurchaseService) FormPurchase(card models.Card, transactoinUUID string)
 	// TODO del
 	bl := balance_event.NewBalanceEventService(s.allMethods, s.postback)
 
-	go bl.PurchaseBalanceEvent(&tr)
+	bl.PurchaseBalanceEvent(&tr)
+
+	transactionStatus := models.Transaction{
+		UUID:       transactoinUUID,
+		MerchantID: tr.MerchantID,
+	}
+
+	if err := s.repository.Status(&transactionStatus); err != nil {
+		log.Printf("transactionStatus error - %s", err)
+	}
+
+	if transactionStatus.TransactionStatus != models.ComplitedStatus {
+		return errors.New("transaction rejected")
+	}
 
 	return nil
 }
